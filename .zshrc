@@ -108,7 +108,22 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias rf="cd ~/code/epicreact/react-fundamentals"
 alias nv="nvim"
-alias config="nvim ~/.config/nvim/init.vim"
+alias nvconfig="nvim ~/.config/nvim/init.vim"
+alias zshrc="nvim ~/.zshrc"
+
+# Git Aliases
+alias gs="git status"
+alias ga="git add ."
+alias gc="git commit -am"
+alias gp="git pull origin main"
+alias gpr="git pull -r origin main"
+alias gps="git push origin main"
+
+# Tmuxinator Alias
+alias tx="tmuxinator"
+
+export PATH=$PATH:/Users/alouiseq
+export EDITOR=nvim
 
 #
 source ~/powerlevel10k/powerlevel10k.zsh-theme
@@ -119,3 +134,10 @@ source ~/powerlevel10k/powerlevel10k.zsh-theme
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Make chruby accessible
+source $(brew --prefix)/opt/chruby/share/chruby/chruby.sh
+
+# Set default Ruby version
+chruby ruby-3.2
+
