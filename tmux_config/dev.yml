@@ -1,0 +1,17 @@
+# /Users/alouiseq/.config/tmuxinator/dev.yml
+
+name: dev
+root: ~/code
+
+windows:
+  - main:
+      layout: db19,267x78,0,0[267x51,0,0{133x51,0,0,29,133x51,134,0,32},267x26,0,52,31] 
+      panes:
+        - commands:
+          - cd dev-cmds
+          - nv
+        - dotfiles:
+            - cd dotfiles
+            - nv
+        - shell:
+            - #empty
