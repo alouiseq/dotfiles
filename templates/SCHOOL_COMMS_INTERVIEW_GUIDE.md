@@ -63,6 +63,19 @@
 
 ---
 
+### 6. Test Differentiation
+> "There's an app called Ohai that does this for $25/month. Would you pay $8/month for something simpler that just focuses on school?"
+
+> "Would you prefer an app that does everything - groceries, chores, appointments - or one that just handles school stuff really well?"
+
+> "What if instead of downloading an app, you just got a weekly text summarizing your kids' school week?"
+
+> "Would you use something even if other parents at your school weren't using it?"
+
+**Listen for:** Price sensitivity, preference for simplicity vs features, app fatigue
+
+---
+
 ## Quick Notes During Interview
 
 **Pain level (circle):**  None  /  Mild  /  Moderate  /  High  /  Hair-on-fire
