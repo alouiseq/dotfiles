@@ -233,29 +233,82 @@ Join local parent groups and search/lurk for:
 
 ---
 
-## Part 4: Concierge MVP (Optional - If Competitors Fall Short)
+## Part 4: Concierge MVP
 
-If Honeycomb/Gether don't solve the problem, test your solution manually before building.
+### Phase A: Dog-Food It Yourself First
 
-### The Concierge Test
+Before asking other parents, build a working prototype for YOUR family.
 
-1. Ask 5-10 parent friends to forward you their school newsletters/emails for 4 weeks
-2. Manually (or with a Python script + GPT-4) create a "Sunday Night Briefing" for each family
-3. Send via text: "Kid A: field trip Wed (bring $5). Kid B: spelling test Fri. [Links]"
-4. After 4 weeks, ask: "Would you pay $10/month to keep getting this automatically?"
+#### Step 1: Email Retrieval Setup
 
-### What You're Testing
+**Technical Options:**
 
-- Does the briefing format actually help?
-- Is the information extraction accurate enough?
+| Option | How | Pros | Cons |
+|--------|-----|------|------|
+| Gmail API | Pull emails from ParentSquare/school senders | Full control, automated | OAuth setup |
+| Email forwarding | Auto-forward school emails to script inbox | Simple, no API | Manual rule setup |
+| ParentSquare iCal | Check if calendar export exists | Direct integration | May not exist |
+| Screenshot + GPT-4 Vision | Screenshot app, extract with AI | Works for any source | Manual step |
+
+**Questions to answer:**
+- [ ] Where do school emails land? (Gmail, Outlook, other?)
+- [ ] Does ParentSquare send email notifications or only in-app?
+- [ ] Do you also get texts from school?
+- [ ] Does ParentSquare have an iCal/calendar export?
+
+#### Step 2: Build Simple Extractor
+
+```
+Input: School emails (from Gmail or forwarded)
+Processing:
+  - Filter by sender (ParentSquare, school domain)
+  - Extract dates, events, deadlines, action items
+  - Use GPT-4 to parse messy newsletter formats
+Output: Structured list of events with dates
+```
+
+#### Step 3: Generate Your Own Sunday Briefing
+
+Test on yourself for 2 weeks:
+- Does it catch everything?
+- What does it miss?
+- Is the format useful?
+- How long does it take?
+
+#### Step 4: Refine Before Expanding
+
+Only after it works for YOU, move to Phase B.
+
+---
+
+### Phase B: Concierge Test with Other Parents
+
+After your prototype works, test with 5 parents from the survey.
+
+#### The Ask
+
+> "I built something for myself that sends me a weekly summary of all my kids' school events and deadlines. It's been really helpful. Would you want to try it for 2 weeks? Just forward me your school emails and I'll send you a Sunday briefing."
+
+#### The Test
+
+1. 5 parents forward you their school emails for 2 weeks
+2. Run their emails through your script (or do manually)
+3. Send them a "Sunday Briefing" text:
+   > "Kid A: field trip Wed (bring $5). Picture day Fri. Kid B: Spelling test Thu."
+4. After 2 weeks, ask: "Was this helpful? Would you pay $5/month to keep getting this?"
+
+#### What You're Testing
+
+- Does the briefing format actually help others?
+- Is extraction accurate across different schools?
 - Will parents remember to forward emails?
-- What sources are hardest to parse? (WhatsApp? Flyers? PDFs?)
+- What sources are hardest to parse?
 
-### Success Criteria
+#### Success Criteria
 
-- 3+ out of 10 parents say "Yes, I'd pay $10/month" = validated
-- If they say "I'd pay $5" = consider lower price point
-- If no one pays = problem isn't painful enough OR briefing format isn't right
+- 2-3 out of 5 parents say "Yes, I'd pay $5/month" = **validated, build it**
+- If they say "helpful but wouldn't pay" = **consider freemium**
+- If no one finds it helpful = **pivot or kill**
 
 ---
 
