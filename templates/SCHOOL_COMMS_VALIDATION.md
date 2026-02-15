@@ -349,7 +349,54 @@ Phase 3: School Community (optional expansion)
 
 ### Entries
 
-*(Add your findings below as you go)*
+#### 2/14/2026 - Parent Survey (11 Responses)
+
+**Finding:** High interest but soft willingness to pay. Auto-calendar is the killer feature, not AI summaries.
+
+**Evidence:**
+
+Demographics:
+- 11 parents, 1-4 kids each, 1-3 schools
+- 10/11 working full-time
+- 9/11 use ParentSquare
+
+Pain Level:
+- Overwhelm avg: 2.3/5 (moderate, not severe)
+- 73% missed something or had "close call" in past month
+- 6/11 feel stressed "a few times a month"
+
+Interest:
+- 10/11 would use (5 "definitely", 5 "probably")
+
+Willingness to Pay:
+- 1/11 said "Yes" outright
+- 5/11 said "Maybe if affordable"
+- 5/11 said "Only if free"
+
+Price Tolerance:
+- 3 wouldn't pay anything
+- 3 would pay under $3/mo
+- 3 would pay $3-5/mo
+- 2 would pay $5-10/mo
+
+Most Wanted Features:
+1. Automatic calendar events (9/11 - 82%)
+2. Smart reminders before deadlines (8/11 - 73%)
+3. One inbox for all messages (5/11)
+4. Works across multiple kids/schools (4/11)
+5. AI summaries (3/11) - LOW priority
+
+Key Quotes:
+> "Felt bad, because I knew my son would've liked the program"
+> "Comes from too many platforms - Peachjar, PTA, school fund, school, and district emails"
+> "Parents in our community created a WhatsApp group for school communication"
+> "I wish the notifications arrived at least a week prior"
+
+**Implication:**
+- Lead with auto-calendar + reminders, NOT AI summaries
+- Price at $3-5/mo (not $8-10) or consider freemium
+- "Maybe" payers need to experience value before converting
+- Concierge MVP could convert soft interest to paying customers
 
 ---
 
