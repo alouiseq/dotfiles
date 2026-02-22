@@ -1,6 +1,15 @@
 # Dotfiles - Claude Code Resources
 
-This repo contains reusable agents and templates for Claude Code.
+This repo contains reusable agents, templates, and scripts for Claude Code.
+
+---
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| [dev-launcher-mac.sh](scripts/dev-launcher-mac.sh) | Dev environment launcher for macOS (iTerm2 native tabs/panes) |
+| [dev-launcher-linux.sh](scripts/dev-launcher-linux.sh) | Dev environment launcher for Linux/WSL (tmux sessions) |
 
 ---
 
@@ -63,6 +72,8 @@ cp templates/PRODUCT_RESEARCH.md /path/to/project/
 ## Adding New Resources
 
 **Agents:** Save to `agents/[NAME]_AGENT.md`
+
+**Scripts:** Save to `scripts/[NAME].sh`
 
 **Templates:** Save to `templates/[NAME].md` or `templates/[category]/[NAME].md`
 
