@@ -5,14 +5,13 @@
 #
 # iTerm2 Session Name/Title Notes:
 # - Session names are set via AppleScript `set name to` AFTER a delay, because
-#   setting them immediately gets overridden before the session initializes.
+#   claude and other processes override the name before the session initializes.
 # - Each session must be captured into a variable (e.g., `set webPane to current
 #   session of tab`) before splitting or creating new tabs. Using `current session`
 #   dynamically resolves to whichever session is active, which changes after splits
 #   and new tab creation.
-# - iTerm2 Profile > General > Title must have "Session Name" checked and "Job"
-#   unchecked, otherwise tabs display the running process name instead of the
-#   assigned session name.
+# - iTerm2 Profile > General > Title must be set to "Name" only, otherwise tabs
+#   display the running process name (Job) instead of the assigned session name.
 
 # Check for iTerm2
 if [[ ! -d "/Applications/iTerm.app" ]]; then
