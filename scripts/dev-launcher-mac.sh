@@ -124,8 +124,8 @@ for project in "${selected_projects[@]}"; do
     tenxrep)
       applescript+="
     -- tenxrep: dev tab with split panes
-    tell current session of $tab_ref
-      set name to \"tenxrep - dev\"
+    set webPane to current session of $tab_ref
+    tell webPane
       write text \"cd $HOME/code/tenxrep/tenxrep-web && nvm use && npm run dev\"
       set apiPane to (split vertically with default profile)
       tell apiPane
@@ -134,33 +134,54 @@ for project in "${selected_projects[@]}"; do
     end tell
     -- tenxrep: claude tab
     set trClaudeTab to (create tab with default profile)
-    tell current session of trClaudeTab
-      set name to \"tenxrep - claude\"
+    set trClaudeSession to current session of trClaudeTab
+    tell trClaudeSession
       write text \"cd $HOME/code/tenxrep && claude\"
+    end tell
+    delay 1
+    tell webPane
+      set name to \"tenxrep - dev\"
+    end tell
+    tell apiPane
+      set name to \"tenxrep - api\"
+    end tell
+    tell trClaudeSession
+      set name to \"tenxrep - claude\"
     end tell
 "
       ;;
     school-comms)
       applescript+="
     -- school-comms: claude tab
-    tell current session of $tab_ref
-      set name to \"school-comms - claude\"
+    set scSession to current session of $tab_ref
+    tell scSession
       write text \"cd $HOME/code/school-comms && source venv/bin/activate && claude\"
+    end tell
+    delay 1
+    tell scSession
+      set name to \"school-comms - claude\"
     end tell
 "
       ;;
     main-site)
       applescript+="
     -- main-site: dev tab
-    tell current session of $tab_ref
-      set name to \"main-site - dev\"
-      write text \"cd $HOME/code/main-site && yarn start\"
+    set msDevSession to current session of $tab_ref
+    tell msDevSession
+      write text \"cd $HOME/code/main-site && yarn install && yarn start\"
     end tell
     -- main-site: claude tab
     set msClaudeTab to (create tab with default profile)
-    tell current session of msClaudeTab
-      set name to \"main-site - claude\"
+    set msClaudeSession to current session of msClaudeTab
+    tell msClaudeSession
       write text \"cd $HOME/code/main-site && claude\"
+    end tell
+    delay 1
+    tell msDevSession
+      set name to \"main-site - dev\"
+    end tell
+    tell msClaudeSession
+      set name to \"main-site - claude\"
     end tell
 "
       ;;
