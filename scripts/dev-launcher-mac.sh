@@ -23,6 +23,7 @@ PROJECTS=(
   "tenxrep"
   "school-comms"
   "main-site"
+  "exectheedge-journal"
 )
 
 # Colors
@@ -192,6 +193,28 @@ for project in "${selected_projects[@]}"; do
     end tell
     tell msClaudeSession
       set name to \"main-site - claude\"
+    end tell
+"
+      ;;
+    exectheedge-journal)
+      applescript+="
+    -- exectheedge-journal: dev tab
+    set ejDevSession to current session of $tab_ref
+    tell ejDevSession
+      write text \"cd $HOME/code/exectheedge-journal && npm run dev\"
+    end tell
+    -- exectheedge-journal: claude tab
+    set ejClaudeTab to (create tab with default profile)
+    set ejClaudeSession to current session of ejClaudeTab
+    tell ejClaudeSession
+      write text \"cd $HOME/code/exectheedge-journal && claude\"
+    end tell
+    delay 1
+    tell ejDevSession
+      set name to \"exectheedge-journal - dev\"
+    end tell
+    tell ejClaudeSession
+      set name to \"exectheedge-journal - claude\"
     end tell
 "
       ;;
