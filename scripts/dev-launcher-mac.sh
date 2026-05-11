@@ -24,7 +24,13 @@ PROJECTS=(
   "school-comms"
   "main-site"
   "exectheedge-journal"
+  "multi-ppo"
 )
+
+# Shell snippet: if current branch is `main`, pull; otherwise no-op.
+# Safe in non-repo dirs (git returns empty, grep fails, no-op). `|| true` swallows
+# pull errors / git-lock conflicts so the rest of the chain still runs.
+PULL_CHECK='{ git branch --show-current 2>/dev/null | grep -qx main && git pull || true; }'
 
 # Colors
 BOLD='\033[1m'
@@ -35,7 +41,6 @@ RED='\033[0;31m'
 RESET='\033[0m'
 
 echo -e "${BOLD}${CYAN}=== Dev Launcher (macOS) ===${RESET}\n"
-echo -e "Select projects to start (toggle with number, ${GREEN}Enter${RESET} to launch):\n"
 
 # Track selections (0 = unselected, 1 = selected)
 declare -a selected
@@ -43,57 +48,100 @@ for i in "${!PROJECTS[@]}"; do
   selected[$i]=0
 done
 
-print_menu() {
-  for i in "${!PROJECTS[@]}"; do
-    if [[ ${selected[$i]} -eq 1 ]]; then
-      echo -e "  ${GREEN}[x]${RESET} $((i+1)). ${BOLD}${PROJECTS[$i]}${RESET}"
-    else
-      echo -e "  [ ] $((i+1)). ${PROJECTS[$i]}"
-    fi
-  done
-  echo ""
-  echo -e "  ${YELLOW}a${RESET}) Select all  ${YELLOW}n${RESET}) Select none  ${GREEN}Enter${RESET}) Launch selected  ${RED}q${RESET}) Quit"
-}
-
-while true; do
-  print_menu
-  echo ""
-  read -rp "Choice: " choice
-
-  # Move cursor up to redraw menu cleanly
-  lines=$((${#PROJECTS[@]} + 4))
-  printf "\033[%dA\033[J" "$lines"
-
-  case "$choice" in
-    q|Q)
-      echo "Cancelled."
+# --help / -h: print usage and the project list, then exit
+for arg in "$@"; do
+  case "$arg" in
+    -h|--help|help)
+      echo -e "${BOLD}Usage:${RESET} rp [numbers... | a | -h]"
+      echo ""
+      echo -e "${BOLD}Examples:${RESET}"
+      echo "  rp           # interactive menu"
+      echo "  rp 1 3       # launch projects 1 and 3"
+      echo "  rp a         # launch all projects"
+      echo ""
+      echo -e "${BOLD}Projects:${RESET}"
+      for i in "${!PROJECTS[@]}"; do
+        echo "  $((i+1)). ${PROJECTS[$i]}"
+      done
       exit 0
-      ;;
-    a|A)
-      for i in "${!PROJECTS[@]}"; do
-        selected[$i]=1
-      done
-      ;;
-    n|N)
-      for i in "${!PROJECTS[@]}"; do
-        selected[$i]=0
-      done
-      ;;
-    "")
-      break
-      ;;
-    *)
-      if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#PROJECTS[@]} )); then
-        idx=$((choice - 1))
-        if [[ ${selected[$idx]} -eq 0 ]]; then
-          selected[$idx]=1
-        else
-          selected[$idx]=0
-        fi
-      fi
       ;;
   esac
 done
+
+# Non-interactive mode: arguments passed (e.g. `rp 1 3 5` or `rp a`)
+if [[ $# -gt 0 ]]; then
+  for arg in "$@"; do
+    case "$arg" in
+      a|A|all)
+        for i in "${!PROJECTS[@]}"; do
+          selected[$i]=1
+        done
+        ;;
+      *)
+        if [[ "$arg" =~ ^[0-9]+$ ]] && (( arg >= 1 && arg <= ${#PROJECTS[@]} )); then
+          selected[$((arg - 1))]=1
+        else
+          echo -e "${RED}Invalid argument:${RESET} $arg (expected 1-${#PROJECTS[@]} or 'a')"
+          exit 1
+        fi
+        ;;
+    esac
+  done
+else
+  echo -e "Select projects to start (toggle with number, ${GREEN}Enter${RESET} to launch):\n"
+
+  print_menu() {
+    for i in "${!PROJECTS[@]}"; do
+      if [[ ${selected[$i]} -eq 1 ]]; then
+        echo -e "  ${GREEN}[x]${RESET} $((i+1)). ${BOLD}${PROJECTS[$i]}${RESET}"
+      else
+        echo -e "  [ ] $((i+1)). ${PROJECTS[$i]}"
+      fi
+    done
+    echo ""
+    echo -e "  ${YELLOW}a${RESET}) Select all  ${YELLOW}n${RESET}) Select none  ${GREEN}Enter${RESET}) Launch selected  ${RED}q${RESET}) Quit"
+  }
+
+  while true; do
+    print_menu
+    echo ""
+    read -rp "Choice: " choice
+
+    # Move cursor up to redraw menu cleanly
+    lines=$((${#PROJECTS[@]} + 4))
+    printf "\033[%dA\033[J" "$lines"
+
+    case "$choice" in
+      q|Q)
+        echo "Cancelled."
+        exit 0
+        ;;
+      a|A)
+        for i in "${!PROJECTS[@]}"; do
+          selected[$i]=1
+        done
+        ;;
+      n|N)
+        for i in "${!PROJECTS[@]}"; do
+          selected[$i]=0
+        done
+        ;;
+      "")
+        break
+        ;;
+      *)
+        if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#PROJECTS[@]} )); then
+          idx=$((choice - 1))
+          if [[ ${selected[$idx]} -eq 0 ]]; then
+            selected[$idx]=1
+          else
+            selected[$idx]=0
+          fi
+        fi
+        ;;
+    esac
+  done
+fi
 
 # Collect selected project names
 selected_projects=()
@@ -106,6 +154,35 @@ done
 if [[ ${#selected_projects[@]} -eq 0 ]]; then
   echo -e "${YELLOW}No projects selected.${RESET}"
   exit 0
+fi
+
+# Pre-flight: verify required directories exist for each selected project.
+# Missing dirs would otherwise cause `cd` to fail silently inside iTerm panes.
+required_dirs_for() {
+  case "$1" in
+    tenxrep)             echo "$HOME/code/tenxrep/tenxrep-web" "$HOME/code/tenxrep/tenxrep-api" ;;
+    school-comms)        echo "$HOME/code/school-comms" ;;
+    main-site)           echo "$HOME/code/main-site" ;;
+    exectheedge-journal) echo "$HOME/code/exectheedge-journal" ;;
+    multi-ppo)           echo "$HOME/code/multiview-indicator/multi-ppo" ;;
+  esac
+}
+
+missing=()
+for project in "${selected_projects[@]}"; do
+  for dir in $(required_dirs_for "$project"); do
+    if [[ ! -d "$dir" ]]; then
+      missing+=("$project: $dir")
+    fi
+  done
+done
+
+if [[ ${#missing[@]} -gt 0 ]]; then
+  echo -e "${RED}Missing directories:${RESET}"
+  for entry in "${missing[@]}"; do
+    echo -e "  ${RED}-${RESET} $entry"
+  done
+  exit 1
 fi
 
 # Build AppleScript to launch projects in iTerm2
@@ -134,30 +211,55 @@ for project in "${selected_projects[@]}"; do
   case "$project" in
     tenxrep)
       applescript+="
-    -- tenxrep: dev tab with split panes
+    -- tenxrep: dev tab (web | api on top, dir spanning bottom)
     set webPane to current session of $tab_ref
     tell webPane
-      write text \"cd $HOME/code/tenxrep/tenxrep-web && nvm use && npm run dev\"
+      write text \"cd $HOME/code/tenxrep/tenxrep-web && $PULL_CHECK && nvm use && npm run dev\"
+      set dirPane to (split horizontally with default profile)
+      tell dirPane
+        write text \"cd $HOME/code/tenxrep\"
+      end tell
       set apiPane to (split vertically with default profile)
       tell apiPane
-        write text \"cd $HOME/code/tenxrep/tenxrep-api && source venv/bin/activate && python --version && python run.py\"
+        write text \"cd $HOME/code/tenxrep/tenxrep-api && $PULL_CHECK && source venv/bin/activate && python --version && python run.py\"
       end tell
     end tell
-    -- tenxrep: claude tab
+    -- tenxrep: claude tab (also pulls the parent tenxrep repo if on main)
     set trClaudeTab to (create tab with default profile)
     set trClaudeSession to current session of trClaudeTab
     tell trClaudeSession
+      write text \"cd $HOME/code/tenxrep && $PULL_CHECK && claude\"
+    end tell
+    -- tenxrep: exercises tab
+    set trExercisesTab to (create tab with default profile)
+    set trExercisesSession to current session of trExercisesTab
+    tell trExercisesSession
+      write text \"cd $HOME/code/tenxrep && claude\"
+    end tell
+    -- tenxrep: social-content tab
+    set trSocialTab to (create tab with default profile)
+    set trSocialSession to current session of trSocialTab
+    tell trSocialSession
       write text \"cd $HOME/code/tenxrep && claude\"
     end tell
     delay 1
     tell webPane
-      set name to \"tenxrep - dev\"
+      set name to \"tenxrep-web\"
     end tell
     tell apiPane
-      set name to \"tenxrep - api\"
+      set name to \"tenxrep-api\"
+    end tell
+    tell dirPane
+      set name to \"tenxrep-dir\"
     end tell
     tell trClaudeSession
-      set name to \"tenxrep - claude\"
+      set name to \"tenxrep\"
+    end tell
+    tell trExercisesSession
+      set name to \"exercises\"
+    end tell
+    tell trSocialSession
+      set name to \"social-content\"
     end tell
 "
       ;;
@@ -166,7 +268,7 @@ for project in "${selected_projects[@]}"; do
     -- school-comms: claude tab
     set scSession to current session of $tab_ref
     tell scSession
-      write text \"cd $HOME/code/school-comms && source venv/bin/activate && claude\"
+      write text \"cd $HOME/code/school-comms && $PULL_CHECK && source venv/bin/activate && claude\"
     end tell
     delay 1
     tell scSession
@@ -179,7 +281,7 @@ for project in "${selected_projects[@]}"; do
     -- main-site: dev tab
     set msDevSession to current session of $tab_ref
     tell msDevSession
-      write text \"cd $HOME/code/main-site && yarn install && yarn start\"
+      write text \"cd $HOME/code/main-site && $PULL_CHECK && yarn install && yarn start\"
     end tell
     -- main-site: claude tab
     set msClaudeTab to (create tab with default profile)
@@ -198,10 +300,14 @@ for project in "${selected_projects[@]}"; do
       ;;
     exectheedge-journal)
       applescript+="
-    -- exectheedge-journal: dev tab
-    set ejDevSession to current session of $tab_ref
-    tell ejDevSession
-      write text \"cd $HOME/code/exectheedge-journal && npm run dev\"
+    -- exectheedge-journal: dev tab (server top, dir bottom)
+    set ejServerSession to current session of $tab_ref
+    tell ejServerSession
+      write text \"cd $HOME/code/exectheedge-journal && $PULL_CHECK && npm run dev\"
+      set ejDirPane to (split horizontally with default profile)
+      tell ejDirPane
+        write text \"cd $HOME/code/exectheedge-journal\"
+      end tell
     end tell
     -- exectheedge-journal: claude tab
     set ejClaudeTab to (create tab with default profile)
@@ -210,11 +316,27 @@ for project in "${selected_projects[@]}"; do
       write text \"cd $HOME/code/exectheedge-journal && claude\"
     end tell
     delay 1
-    tell ejDevSession
-      set name to \"exectheedge-journal - dev\"
+    tell ejServerSession
+      set name to \"exectheedge-server\"
+    end tell
+    tell ejDirPane
+      set name to \"exectheedge-dir\"
     end tell
     tell ejClaudeSession
-      set name to \"exectheedge-journal - claude\"
+      set name to \"exectheedge\"
+    end tell
+"
+      ;;
+    multi-ppo)
+      applescript+="
+    -- multi-ppo: claude tab
+    set mpSession to current session of $tab_ref
+    tell mpSession
+      write text \"cd $HOME/code/multiview-indicator/multi-ppo && $PULL_CHECK && claude\"
+    end tell
+    delay 1
+    tell mpSession
+      set name to \"multi-ppo\"
     end tell
 "
       ;;
@@ -229,11 +351,15 @@ end tell
 '
 
 echo -e "${GREEN}[+] Launching ${#selected_projects[@]} project(s) in iTerm2...${RESET}"
-osascript -e "$applescript" 2>/dev/null
+osascript_err=$(osascript -e "$applescript" 2>&1 >/dev/null)
+osascript_status=$?
 
-if [[ $? -eq 0 ]]; then
+if [[ $osascript_status -eq 0 ]]; then
   echo -e "${GREEN}${BOLD}Launched ${#selected_projects[@]} project(s) in iTerm2.${RESET}"
 else
   echo -e "${RED}Failed to launch iTerm2. Make sure iTerm2 is running or can be started.${RESET}"
+  if [[ -n "$osascript_err" ]]; then
+    echo -e "${RED}osascript error:${RESET} $osascript_err"
+  fi
   exit 1
 fi
