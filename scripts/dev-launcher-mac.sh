@@ -211,34 +211,48 @@ for project in "${selected_projects[@]}"; do
   case "$project" in
     tenxrep)
       applescript+="
-    -- tenxrep: dev tab (web | api on top, dir spanning bottom)
+    -- tenxrep: dev tab (web | api)
     set webPane to current session of $tab_ref
     tell webPane
       write text \"cd $HOME/code/tenxrep/tenxrep-web && $PULL_CHECK && nvm use && npm run dev\"
-      set dirPane to (split horizontally with default profile)
-      tell dirPane
-        write text \"cd $HOME/code/tenxrep\"
-      end tell
       set apiPane to (split vertically with default profile)
       tell apiPane
         write text \"cd $HOME/code/tenxrep/tenxrep-api && $PULL_CHECK && source venv/bin/activate && python --version && python run.py\"
       end tell
     end tell
-    -- tenxrep: claude tab (also pulls the parent tenxrep repo if on main)
+    -- tenxrep: claude tab (dir top 30%, claude bottom 70%; claude pulls if on main)
     set trClaudeTab to (create tab with default profile)
-    set trClaudeSession to current session of trClaudeTab
+    set trClaudeDirSession to current session of trClaudeTab
+    tell trClaudeDirSession
+      write text \"cd $HOME/code/tenxrep\"
+      set trClaudeOrigRows to rows
+      set trClaudeSession to (split horizontally with default profile)
+    end tell
+    set rows of trClaudeDirSession to (trClaudeOrigRows * 30) div 100
     tell trClaudeSession
       write text \"cd $HOME/code/tenxrep && $PULL_CHECK && claude\"
     end tell
-    -- tenxrep: exercises tab
+    -- tenxrep: exercises tab (dir top 30%, claude bottom 70%)
     set trExercisesTab to (create tab with default profile)
-    set trExercisesSession to current session of trExercisesTab
+    set trExercisesDirSession to current session of trExercisesTab
+    tell trExercisesDirSession
+      write text \"cd $HOME/code/tenxrep\"
+      set trExercisesOrigRows to rows
+      set trExercisesSession to (split horizontally with default profile)
+    end tell
+    set rows of trExercisesDirSession to (trExercisesOrigRows * 30) div 100
     tell trExercisesSession
       write text \"cd $HOME/code/tenxrep && claude\"
     end tell
-    -- tenxrep: social-content tab
+    -- tenxrep: social-content tab (dir top 30%, claude bottom 70%)
     set trSocialTab to (create tab with default profile)
-    set trSocialSession to current session of trSocialTab
+    set trSocialDirSession to current session of trSocialTab
+    tell trSocialDirSession
+      write text \"cd $HOME/code/tenxrep\"
+      set trSocialOrigRows to rows
+      set trSocialSession to (split horizontally with default profile)
+    end tell
+    set rows of trSocialDirSession to (trSocialOrigRows * 30) div 100
     tell trSocialSession
       write text \"cd $HOME/code/tenxrep && claude\"
     end tell
@@ -249,14 +263,20 @@ for project in "${selected_projects[@]}"; do
     tell apiPane
       set name to \"tenxrep-api\"
     end tell
-    tell dirPane
+    tell trClaudeDirSession
       set name to \"tenxrep-dir\"
     end tell
     tell trClaudeSession
       set name to \"tenxrep\"
     end tell
+    tell trExercisesDirSession
+      set name to \"exercises-dir\"
+    end tell
     tell trExercisesSession
       set name to \"exercises\"
+    end tell
+    tell trSocialDirSession
+      set name to \"social-content-dir\"
     end tell
     tell trSocialSession
       set name to \"social-content\"
@@ -265,12 +285,21 @@ for project in "${selected_projects[@]}"; do
       ;;
     school-comms)
       applescript+="
-    -- school-comms: claude tab
-    set scSession to current session of $tab_ref
+    -- school-comms: claude tab (dir top 30%, claude bottom 70%)
+    set scDirSession to current session of $tab_ref
+    tell scDirSession
+      write text \"cd $HOME/code/school-comms\"
+      set scOrigRows to rows
+      set scSession to (split horizontally with default profile)
+    end tell
+    set rows of scDirSession to (scOrigRows * 30) div 100
     tell scSession
       write text \"cd $HOME/code/school-comms && $PULL_CHECK && source venv/bin/activate && claude\"
     end tell
     delay 1
+    tell scDirSession
+      set name to \"school-comms - dir\"
+    end tell
     tell scSession
       set name to \"school-comms - claude\"
     end tell
@@ -283,15 +312,24 @@ for project in "${selected_projects[@]}"; do
     tell msDevSession
       write text \"cd $HOME/code/main-site && $PULL_CHECK && yarn install && yarn start\"
     end tell
-    -- main-site: claude tab
+    -- main-site: claude tab (dir top 30%, claude bottom 70%)
     set msClaudeTab to (create tab with default profile)
-    set msClaudeSession to current session of msClaudeTab
+    set msDirSession to current session of msClaudeTab
+    tell msDirSession
+      write text \"cd $HOME/code/main-site\"
+      set msOrigRows to rows
+      set msClaudeSession to (split horizontally with default profile)
+    end tell
+    set rows of msDirSession to (msOrigRows * 30) div 100
     tell msClaudeSession
       write text \"cd $HOME/code/main-site && claude\"
     end tell
     delay 1
     tell msDevSession
       set name to \"main-site - dev\"
+    end tell
+    tell msDirSession
+      set name to \"main-site - dir\"
     end tell
     tell msClaudeSession
       set name to \"main-site - claude\"
@@ -309,9 +347,15 @@ for project in "${selected_projects[@]}"; do
         write text \"cd $HOME/code/exectheedge-journal\"
       end tell
     end tell
-    -- exectheedge-journal: claude tab
+    -- exectheedge-journal: claude tab (dir top 30%, claude bottom 70%)
     set ejClaudeTab to (create tab with default profile)
-    set ejClaudeSession to current session of ejClaudeTab
+    set ejDirSession to current session of ejClaudeTab
+    tell ejDirSession
+      write text \"cd $HOME/code/exectheedge-journal\"
+      set ejOrigRows to rows
+      set ejClaudeSession to (split horizontally with default profile)
+    end tell
+    set rows of ejDirSession to (ejOrigRows * 30) div 100
     tell ejClaudeSession
       write text \"cd $HOME/code/exectheedge-journal && claude\"
     end tell
@@ -322,6 +366,9 @@ for project in "${selected_projects[@]}"; do
     tell ejDirPane
       set name to \"exectheedge-dir\"
     end tell
+    tell ejDirSession
+      set name to \"exectheedge-claude-dir\"
+    end tell
     tell ejClaudeSession
       set name to \"exectheedge\"
     end tell
@@ -329,12 +376,21 @@ for project in "${selected_projects[@]}"; do
       ;;
     multi-ppo)
       applescript+="
-    -- multi-ppo: claude tab
-    set mpSession to current session of $tab_ref
+    -- multi-ppo: claude tab (dir top 30%, claude bottom 70%)
+    set mpDirSession to current session of $tab_ref
+    tell mpDirSession
+      write text \"cd $HOME/code/multiview-indicator/multi-ppo\"
+      set mpOrigRows to rows
+      set mpSession to (split horizontally with default profile)
+    end tell
+    set rows of mpDirSession to (mpOrigRows * 30) div 100
     tell mpSession
       write text \"cd $HOME/code/multiview-indicator/multi-ppo && $PULL_CHECK && claude\"
     end tell
     delay 1
+    tell mpDirSession
+      set name to \"multi-ppo-dir\"
+    end tell
     tell mpSession
       set name to \"multi-ppo\"
     end tell
